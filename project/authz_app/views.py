@@ -35,3 +35,7 @@ def profile_view(request):
     # Необходима проверка роли для доступа к профилю
     profile_view.required_role = 'authenticated'  # Нужна любая роль, кроме анонимной
     return render(request, 'authz_app/profile.html')
+
+def has_role(self, role_name):
+    roles = self.roles.values_list('name', flat=True)
+    return role_name in roles

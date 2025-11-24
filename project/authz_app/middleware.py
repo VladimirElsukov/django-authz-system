@@ -16,3 +16,4 @@ class AccessControlMiddleware:
         if required_role and not request.user.has_role(required_role):
             return HttpResponseForbidden("Доступ запрещён.")
         return None
+

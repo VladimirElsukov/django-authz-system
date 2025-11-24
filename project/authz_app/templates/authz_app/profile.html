@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block title %}Профиль пользователя{% endblock %}
+
+{% block content %}
+<div class="profile-page">
+    {% if user.is_authenticated %}
+        <h2>Ваш профиль</h2>
+        <p>Имя: {{ user.first_name }} {{ user.last_name }}</p>
+        <p>Email: {{ user.email }}</p>
+        <p>Аккаунт активен: {{ user.is_active }}</p>
+        <hr />
+        <a href="{% url 'authz:logout' %}">Выйти</a>
+    {% else %}
+        <p>Вам необходимо авторизоваться, чтобы увидеть этот раздел.</p>
+        <a href="{% url 'authz:login' %}">Войти</a>
+    {% endif %}
+</div>
+{% endblock %}

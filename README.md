@@ -58,7 +58,7 @@ Docker (нет)
    
 Клонируйте репозиторий:
 bash
-git clone https://github.com/yourusername/django-authz-system.git
+git clone https://github.com/VladimirElsukov/django-authz-system.git
 cd django-authz-system
 
 Установите зависимости:

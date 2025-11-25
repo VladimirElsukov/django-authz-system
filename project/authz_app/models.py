@@ -57,6 +57,11 @@ class CustomUser(AbstractUser):
         except Role.DoesNotExist:
             print(f"Ошибка: роль '{role_name}' не существует.")
 
+    def delete(self, using=None, keep_parents=False):
+        """Осуществляет мягкое удаление пользователя."""
+        self.is_active = False
+        self.save()
+
 class RoleManager(models.Manager):
     def get_by_natural_key(self, name):
         return self.get(name=name)

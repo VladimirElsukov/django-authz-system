@@ -1,12 +1,14 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.messages import success, error
-from .forms import RegistrationForm, LoginForm
+from .forms import RegistrationForm, LoginForm, ProfileEditForm
 from rest_framework import generics
 from .models import Role, Permission
 from .serializers import RoleSerializer, PermissionSerializer
 from django.utils.translation import gettext_lazy as _
 from django.views.decorators.http import require_http_methods
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 
 
 
@@ -18,28 +20,40 @@ def register_view(request):
     if request.method == 'POST':
         form = RegistrationForm(request.POST)
         if form.is_valid():
+            print("Форма регистрации валидна:", form.cleaned_data)
             user = form.save(commit=False)
+            user.username = user.email  # Устанавливаем username равным email
             user.set_password(form.cleaned_data["password"])
             user.save()
-            success(request, _("Вы успешно зарегистрированы!"))
+            messages.success(request, _("Вы успешно зарегистрированы!"))
             return redirect('authz:login')
+        else:
+            print("Форма регистрации невалидна:", form.errors)
     else:
         form = RegistrationForm()
     return render(request, 'authz_app/register.html', {'form': form})
 
 def login_view(request):
     if request.method == 'POST':
-        form = LoginForm(data=request.POST)
+        form = LoginForm(request, data=request.POST)  # Передаёшь request в форму
         if form.is_valid():
+            print("Форма входа валидна:", form.cleaned_data)
             user = form.get_user()
-            login(request, user)
-            success(request, _("Вы успешно вошли в систему!"))
-            return redirect('authz:profile')
+            if user is not None:
+                login(request, user)
+                messages.success(request, _("Вы успешно вошли в систему!"))
+                return redirect('authz:profile')
+            else:
+                print("Пользователь не найден:", form.cleaned_data)
+                messages.error(request, _("Пользователь не найден."))
         else:
-            error(request, _("Неверные имя пользователя или пароль."))
+            print("Форма входа невалидна:", form.errors)
+            messages.error(request, _("Неверные имя пользователя или пароль."))
     else:
-        form = LoginForm()
+        form = LoginForm(request)  # Передаёшь request в форму
     return render(request, 'authz_app/login.html', {'form': form})
+
+
 
 def logout_view(request):
     logout(request)
@@ -47,8 +61,6 @@ def logout_view(request):
     return redirect('authz:login')
 
 def profile_view(request):
-    if not request.user.is_authenticated:
-        return redirect('authz:login')
     return render(request, 'authz_app/profile.html')
 
 class RoleList(generics.ListCreateAPIView):
@@ -67,3 +79,27 @@ def profile_view(request):
         'message': 'Приветствуем Администратора!',
     }
     return render(request, 'authz_app/profile.html', context)
+
+
+def edit_profile(request):
+    if request.method == 'POST':
+        form = ProfileEditForm(request.POST, instance=request.user)
+        if form.is_valid():
+            form.save()
+            return redirect('profile')  # Перенаправляем обратно на страницу профиля
+    else:
+        form = ProfileEditForm(instance=request.user)
+
+    return render(request, 'edit_profile.html', {'form': form})
+
+
+@login_required
+def deactivate_account(request):
+    if request.method == 'POST':
+        user = request.user
+        user.is_active = False  # Делаем пользователя неактивным
+        user.save()
+        logout(request)  # Немедленно выходим из системы
+        messages.success(request, 'Ваш аккаунт был успешно удалён.')
+        return redirect('index')  # Или любую подходящую страницу
+    return render(request, 'user_settings/deactivate_account.html')

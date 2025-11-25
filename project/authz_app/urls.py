@@ -12,6 +12,8 @@ urlpatterns = [
     path('login/', views.login_view, name='login'),
     path('logout/', views.logout_view, name='logout'),
     path('profile/', views.profile_view, name='profile'),
+    path('edit-profile/', views.edit_profile, name='edit_profile'),
+    path('deactivate-account/', views.deactivate_account, name='deactivate_account'),
     path('roles/', RoleList.as_view(), name='role-list'),
     path('permissions/', PermissionList.as_view(), name='permission-list'),
 

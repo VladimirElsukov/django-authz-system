@@ -9,14 +9,15 @@ class AccessControlMiddleware:
         return response
 
     def process_view(self, request, view_func, view_args, view_kwargs):
-        # Проверка доступности ресурса для текущего пользователя
+        # Исключаем проверку для страницы профиля
+        if request.path.startswith('/profile'):  # Убираем второй слеш
+            return None
+
+        # Остальная логика осталась прежней
         access_conditions = getattr(view_func, 'required_access', {})
 
         if access_conditions:
-            # Получаем значение атрибута "required_access", где указаны обязательные условия доступа
-            # Например: {'role': 'Администратор'}
             role = access_conditions.get('role')
-
             if role and not request.user.has_role(role):
                 return HttpResponseForbidden("Доступ запрещён.")
 

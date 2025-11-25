@@ -4,8 +4,6 @@ from .models import CustomUser
 from django.contrib.auth import authenticate
 from django.utils.translation import gettext_lazy as _
 
-
-
 class RegistrationForm(forms.ModelForm):
     password_confirm = forms.CharField(
         label=_("Подтверждение пароля"),
@@ -36,16 +34,15 @@ class RegistrationForm(forms.ModelForm):
 
         return cleaned_data
 
-
-class LoginForm(AuthenticationForm):
+class LoginForm(forms.Form):
     """
-    Русскоязычная форма входа.
+    Русскоязычная форма входа, принимающая email вместо username.
     """
-    username = forms.CharField(
-        label=_("Имя пользователя или электронная почта"),
+    email = forms.EmailField(
+        label=_("Email"),
         max_length=254,
-        widget=forms.TextInput(attrs={'autofocus': True}),
-        help_text=_("Введите ваше имя пользователя или электронную почту."),
+        widget=forms.EmailInput(attrs={'autofocus': True}),
+        help_text=_("Введите ваш email."),
     )
 
     password = forms.CharField(
@@ -61,26 +58,36 @@ class LoginForm(AuthenticationForm):
         initial=True,
     )
 
-    def confirm_login_allowed(self, user):
-        """
-        Добавляет дополнительную проверку перед авторизацией.
-        """
-        if not user.is_active:
-            raise forms.ValidationError(_("Этот аккаунт отключён."), code="inactive")
+    def __init__(self, request=None, *args, **kwargs):
+        self.request = request  # Сохраняем request
+        super().__init__(*args, **kwargs)
 
     def clean(self):
         """
         Очистка данных формы.
         """
         cleaned_data = super().clean()
-        username = cleaned_data.get("username")
+        email = cleaned_data.get("email")
         password = cleaned_data.get("password")
 
-        if username and password:
-            self.user_cache = authenticate(self.request, username=username, password=password)
+        if email and password:
+            self.user_cache = authenticate(self.request, email=email, password=password)
             if self.user_cache is None:
-                raise forms.ValidationError(_("Неправильное имя пользователя или пароль."))
+                raise forms.ValidationError(_("Неправильные email или пароль."))
             elif not self.user_cache.is_active:
                 raise forms.ValidationError(_("Этот аккаунт отключён."))
 
         return cleaned_data
+
+    def get_user(self):
+        return self.user_cache
+
+class ProfileEditForm(forms.ModelForm):
+    class Meta:
+        model = CustomUser
+        fields = ['first_name', 'last_name', 'email']
+        widgets = {
+            'first_name': forms.TextInput(attrs={'placeholder': 'Имя'}),
+            'last_name': forms.TextInput(attrs={'placeholder': 'Фамилия'}),
+            'email': forms.EmailInput(attrs={'placeholder': 'E-mail'}),
+        }

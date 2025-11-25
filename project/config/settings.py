@@ -103,6 +103,18 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+LOGIN_REDIRECT_URL = '/profile/'
+LOGOUT_REDIRECT_URL = '/'
+
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+]
+AUTH_USER_MODEL = 'authz_app.CustomUser'
+EMAIL_AUTHENTICATION = True
+
+
+
+
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/

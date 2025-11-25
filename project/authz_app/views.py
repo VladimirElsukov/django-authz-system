@@ -6,6 +6,10 @@ from rest_framework import generics
 from .models import Role, Permission
 from .serializers import RoleSerializer, PermissionSerializer
 from django.utils.translation import gettext_lazy as _
+from django.views.decorators.http import require_http_methods
+
+
+
 
 def index_view(request):
     return render(request, 'index.html')
@@ -54,3 +58,12 @@ class RoleList(generics.ListCreateAPIView):
 class PermissionList(generics.ListCreateAPIView):
     queryset = Permission.objects.all()
     serializer_class = PermissionSerializer
+
+
+@require_http_methods(['GET'])
+def profile_view(request):
+    context = {
+        'user': request.user,
+        'message': 'Приветствуем Администратора!',
+    }
+    return render(request, 'authz_app/profile.html', context)

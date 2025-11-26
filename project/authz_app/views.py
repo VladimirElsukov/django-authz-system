@@ -86,7 +86,7 @@ def edit_profile(request):
         form = ProfileEditForm(request.POST, instance=request.user)
         if form.is_valid():
             form.save()
-            return redirect('profile')  # Перенаправляем обратно на страницу профиля
+            return redirect('authz:profile')  # Перенаправляем обратно на страницу профиля
     else:
         form = ProfileEditForm(instance=request.user)
 
@@ -99,7 +99,10 @@ def deactivate_account(request):
         user = request.user
         user.is_active = False  # Делаем пользователя неактивным
         user.save()
-        logout(request)  # Немедленно выходим из системы
+
+        # Устанавливаем сообщение
         messages.success(request, 'Ваш аккаунт был успешно удалён.')
-        return redirect('index')  # Или любую подходящую страницу
-    return render(request, 'user_settings/deactivate_account.html')
+
+        # Сначала возвращаемся на страницу подтверждения
+        return render(request, 'authz_app/deactivated_confirmation.html')
+    return render(request, 'authz_app/deactivate_account.html')

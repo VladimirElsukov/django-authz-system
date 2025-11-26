@@ -1,0 +1,21 @@
+<!-- templates/authz_app/deactivated_confirmation.html -->
+{% extends "base.html" %}
+
+{% block title %}Аккаунт удалён{% endblock %}
+
+{% block content %}
+<div class="confirmation-message">
+    <h1>Аккаунт успешно удалён</h1>
+    <p>Спасибо за использование нашего сервиса. Ваше удаление прошло успешно.</p>
+    <p>Через несколько секунд вы будете автоматически перенаправлены на главную страницу.</p>
+</div>
+
+<script>
+// Автоматически выйти из системы и перейти на главную страницу через 3 секунды
+setTimeout(() => {
+    // Выход из системы путём очистки cookie sessionid
+    document.cookie = "sessionid=; expires=Thu, 01 Jan 1970 00:00:00 UTC;";
+    window.location.href = '{% url "authz:index" %}';
+}, 3000);
+</script>
+{% endblock %}

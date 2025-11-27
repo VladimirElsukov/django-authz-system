@@ -100,6 +100,15 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         self.save()
 
 
+    def restore_user(self):
+        """Осуществляет востановление пользователя."""
+        # Очистка зависимых записей перед восстановлением
+        self.groups.clear()
+
+        self.user_permissions.clear()    # Восстанавливаем активность пользователя
+        self.is_active = True
+        self.save()
+
 
 
 class RoleManager(models.Manager):

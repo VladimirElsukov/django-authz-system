@@ -9,7 +9,8 @@
         <p>Имя: {{ user.first_name }} {{ user.last_name }}</p>
         <p>Email: {{ user.email }}</p>
         <p>Аккаунт активен: {{ user.is_active }}</p>
-
+        <a href="{% url 'authz:edit_profile' %}" class="btn btn-primary">Редактировать профиль</a>
+        <hr />
         <a href="{% url 'authz:deactivate_account' %}" class="btn btn-danger">Удалить аккаунт</a>
         <hr />
         <a href="{% url 'authz:logout' %}">Выйти</a>

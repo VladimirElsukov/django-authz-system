@@ -9,12 +9,17 @@ from django.utils.translation import gettext_lazy as _
 from django.views.decorators.http import require_http_methods
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-
-
+from .utils import requires_role
 
 
 def index_view(request):
     return render(request, 'index.html')
+
+
+@requires_role('admin')
+def some_admin_action(request):
+    # Здесь выполняем административные операции
+    pass
 
 def register_view(request):
     if request.method == 'POST':
@@ -81,16 +86,17 @@ def profile_view(request):
     return render(request, 'authz_app/profile.html', context)
 
 
+@login_required
 def edit_profile(request):
+    user = request.user
     if request.method == 'POST':
-        form = ProfileEditForm(request.POST, instance=request.user)
+        form = ProfileEditForm(request.POST, instance=user)
         if form.is_valid():
             form.save()
-            return redirect('authz:profile')  # Перенаправляем обратно на страницу профиля
+            return redirect('authz:profile')
     else:
-        form = ProfileEditForm(instance=request.user)
-
-    return render(request, 'edit_profile.html', {'form': form})
+        form = ProfileEditForm(instance=user)
+    return render(request, 'authz_app/edit_profile.html', {'form': form})
 
 
 @login_required

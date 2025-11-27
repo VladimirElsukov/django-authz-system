@@ -1,4 +1,5 @@
 from django.http import HttpResponseForbidden
+from django.core.exceptions import PermissionDenied
 
 class AccessControlMiddleware:
     def __init__(self, get_response):
@@ -10,15 +11,15 @@ class AccessControlMiddleware:
 
     def process_view(self, request, view_func, view_args, view_kwargs):
         # Исключаем проверку для страницы профиля
-        if request.path.startswith('/profile'):  # Убираем второй слеш
+        if request.path.startswith('/profile'):
             return None
 
-        # Остальная логика осталась прежней
+        # Получаем требования по правам доступа
         access_conditions = getattr(view_func, 'required_access', {})
 
         if access_conditions:
             role = access_conditions.get('role')
             if role and not request.user.has_role(role):
-                return HttpResponseForbidden("Доступ запрещён.")
+                raise PermissionDenied("Access denied.")
 
         return None
